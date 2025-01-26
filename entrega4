@@ -1,0 +1,55 @@
+import pandas as pd
+import numpy as np
+
+# Paso 3: Cargar los datos desde los archivos CSV
+ventas = pd.read_csv('/workspace/ventas.csv')
+inventarios = pd.read_csv('/workspace/inventarios.csv')
+satisfaccion = pd.read_csv('/workspace/satisfaccion.csv')
+
+# Paso 4: Limpiar los datos eliminando filas con valores nulos
+ventas.dropna(inplace=True)
+inventarios.dropna(inplace=True)
+satisfaccion.dropna(inplace=True)
+
+# Paso 5: Exploración de datos
+# Calcular las ventas totales por tienda
+ventas['Ventas_totales'] = ventas['Cantidad_vendida'] * ventas['Precio_unitario']
+ventas_totales_por_tienda = ventas.groupby('Tienda')['Ventas_totales'].sum()
+
+# Calcular la rotación de inventarios por tienda
+inventarios['Rotacion_inventario'] = inventarios['Ventas_totales'] / inventarios['Stock_disponible']
+rotacion_inventarios = inventarios.groupby('Tienda')['Rotacion_inventario'].mean()
+
+# Filtrar las tiendas con inventarios críticos (menos del 10% en ventas respecto al inventario disponible)
+tiendas_criticas_inventario = inventarios[inventarios['Rotacion_inventario'] < 0.1]
+
+# Paso 6: Análisis de satisfacción del cliente
+tiendas_baja_satisfaccion = satisfaccion[satisfaccion['Satisfaccion'] < 60]
+
+# Paso 7: Cálculos con Numpy
+# Convertir las ventas totales a un array de Numpy
+ventas_array = ventas['Ventas_totales'].to_numpy()
+
+# Calcular la mediana de las ventas totales
+mediana_ventas = np.median(ventas_array)
+
+# Calcular la desviación estándar de las ventas
+desviacion_estandar_ventas = np.std(ventas_array)
+
+# Simular proyecciones de ventas futuras usando arrays aleatorios de Numpy
+np.random.seed(42)  # Semilla para reproducibilidad
+proyecciones_ventas_futuras = np.random.normal(loc=ventas_array.mean(), scale=ventas_array.std(), size=12)
+
+# Mostrar los resultados
+print("Ventas Totales por Tienda:")
+print(ventas_totales_por_tienda)
+print("\nRotación de Inventarios por Tienda:")
+print(rotacion_inventarios)
+print("\nTiendas con Inventarios Críticos:")
+print(tiendas_criticas_inventario)
+print("\nTiendas con Baja Satisfacción (Menor al 60%):")
+print(tiendas_baja_satisfaccion)
+print("\nMediana de las Ventas Totales:", mediana_ventas)
+print("\nDesviación Estándar de las Ventas Totales:", desviacion_estandar_ventas)
+print("\nProyecciones de Ventas Futuras:")
+print(proyecciones_ventas_futuras)
